@@ -56,84 +56,89 @@ class _AddNoteViewState extends State<AddNoteView> {
 
   @override
   Widget build(BuildContext context) {
+    Size s = MediaQuery.of(context).size;
+    double size = s.height + s.width;
+
     return Scaffold(
       appBar: CustomAppBar(title: titleText),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 80),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onSaved: (newValue) => _title = newValue!,
-                    initialValue: _title,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    readOnly: true,
-                    controller: _dateController,
-                    onTap: _handleDatePicker,
-                    decoration: InputDecoration(
-                      labelText: 'Date',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButtonFormField(
-                    icon: const Icon(Icons.arrow_downward),
-                    items: _priorities.map((String priority) {
-                      return DropdownMenuItem(
-                        value: priority,
-                        child: Text(priority),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      _priority = value.toString();
-                    },
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    )),
-                    value: _priority,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 40),
-                    height: 60,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: ElevatedButton(
-                        onPressed: _submit, child: Text(btnText)),
-                  ),
-                  widget.note != null
-                      ? Container(
-                          margin: const EdgeInsets.symmetric(vertical: 40),
-                          height: 60,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: ElevatedButton(
-                              onPressed: _delete, child: const Text('Delete')),
-                        )
-                      : const SizedBox.shrink()
+                  titleField(),
+                  SizedBox(height: size / 30),
+                  dateField(),
+                  SizedBox(height: size / 30),
+                  dropdown(),
+                  submitButton(),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  TextFormField titleField() {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: 'Title',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      onSaved: (newValue) => _title = newValue!,
+      initialValue: _title,
+    );
+  }
+
+  TextFormField dateField() {
+    return TextFormField(
+      readOnly: true,
+      controller: _dateController,
+      onTap: _handleDatePicker,
+      decoration: InputDecoration(
+        labelText: 'Date',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+  }
+
+  Container submitButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 40),
+      height: 60,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: ElevatedButton(onPressed: _submit, child: Text(btnText)),
+    );
+  }
+
+  DropdownButtonFormField<String> dropdown() {
+    return DropdownButtonFormField(
+      icon: const Icon(Icons.arrow_downward),
+      items: _priorities.map((String priority) {
+        return DropdownMenuItem(
+          value: priority,
+          child: Text(priority),
+        );
+      }).toList(),
+      onChanged: (value) {
+        _priority = value.toString();
+      },
+      decoration: InputDecoration(
+          border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      )),
+      value: _priority,
     );
   }
 
@@ -153,7 +158,6 @@ class _AddNoteViewState extends State<AddNoteView> {
 
   _submit() {
     _formKey.currentState!.save();
-    print('$_title,$_date,$_priority');
     Note note = Note(
       title: _title,
       date: _date,
@@ -169,12 +173,6 @@ class _AddNoteViewState extends State<AddNoteView> {
       DatabaseHelper.instance.updateNote(note);
       goToHomeView();
     }
-    widget.updateNoteList!();
-  }
-
-  _delete() {
-    DatabaseHelper.instance.deleteNote(widget.note!.id!);
-    goToHomeView();
     widget.updateNoteList!();
   }
 

@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import '../model/note_model.dart';
 import '../controller/database.dart';
 import '../utility/priority_color.dart';
+import '../widget/circular_progress_bar.dart';
 import '../widget/custom_app_bar.dart';
+import '../widget/delete_widget.dart';
 import 'add_note_view.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -31,15 +33,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Size s = MediaQuery.of(context).size;
+    double size = s.height + s.width;
     return Scaffold(
       appBar: const CustomAppBar(title: 'MY NOTES'),
       body: FutureBuilder(
         future: _noteList,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return circularProgressBar();
           }
           final int completeNoteCount = snapshot.data!
               .where((Note note) => note.status == 1)
@@ -52,9 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
               if (index == 0) {
                 return Column(
                   children: [
-                    const SizedBox(height: 10),
+                    SizedBox(height: size / 100),
                     Text('$completeNoteCount of ${snapshot.data!.length}'),
-                    const SizedBox(height: 10),
+                    SizedBox(height: size / 100),
                   ],
                 );
               }
@@ -70,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   direction: DismissDirection.endToStart,
                   key: Key(snapshot.data![index].toString()),
-                  background: Container(color: Colors.red),
+                  background: deleteWidget(),
                   child: _buildNotes(snapshot.data![index]));
             },
           );
@@ -118,53 +120,48 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildNotes(Note note) {
-    return Column(
-      children: [
-        ListTile(
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            child: Icon(
-              color: priorityColor(note.priority!),
-              Icons.circle,
-              size: 20,
-            ),
-          ),
-          title: Text(
-            note.title!,
-            style: TextStyle(
-              decoration: note.status == 0
-                  ? TextDecoration.none
-                  : TextDecoration.lineThrough,
-            ),
-          ),
-          subtitle: Text(
-            '${_dateFormatter.format(note.date!)}-${note.priority}',
-            style: TextStyle(
-              decoration: note.status == 0
-                  ? TextDecoration.none
-                  : TextDecoration.lineThrough,
-            ),
-          ),
-          trailing: Checkbox(
-            value: note.status == 1 ? true : false,
-            onChanged: (value) {
-              setState(() {
-                note.status = value! ? 1 : 0;
-              });
-              DatabaseHelper.instance.updateNote(note);
-              _updateNoteList();
-            },
-          ),
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => AddNoteView(
-                        updateNoteList: _updateNoteList(),
-                        note: note,
-                      ))),
+    return ListTile(
+      leading: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        child: Icon(
+          color: priorityColor(note.priority!),
+          Icons.circle,
+          size: 20,
         ),
-        const Divider()
-      ],
+      ),
+      title: Text(
+        note.title!,
+        style: TextStyle(
+          decoration: note.status == 0
+              ? TextDecoration.none
+              : TextDecoration.lineThrough,
+        ),
+      ),
+      subtitle: Text(
+        '${_dateFormatter.format(note.date!)}-${note.priority}',
+        style: TextStyle(
+          decoration: note.status == 0
+              ? TextDecoration.none
+              : TextDecoration.lineThrough,
+        ),
+      ),
+      trailing: Checkbox(
+        value: note.status == 1 ? true : false,
+        onChanged: (value) {
+          setState(() {
+            note.status = value! ? 1 : 0;
+          });
+          DatabaseHelper.instance.updateNote(note);
+          _updateNoteList();
+        },
+      ),
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AddNoteView(
+                    updateNoteList: _updateNoteList(),
+                    note: note,
+                  ))),
     );
   }
 
