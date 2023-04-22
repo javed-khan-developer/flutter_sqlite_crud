@@ -36,13 +36,13 @@ class _AddNoteViewState extends State<AddNoteView> {
       _date = widget.note!.date!;
       _priority = widget.note!.priority!;
       setState(() {
-        btnText = "Update Note";
-        titleText = "Update Note";
+        btnText = "Update Note".toUpperCase();
+        titleText = "Update Note".toUpperCase();
       });
     } else {
       setState(() {
-        btnText = "Add Note";
-        titleText = "Add Note";
+        btnText = "Add Note".toUpperCase();
+        titleText = "Add Note".toUpperCase();
       });
     }
     _dateController.text = _dateFormatatter.format(_date);
@@ -93,6 +93,7 @@ class _AddNoteViewState extends State<AddNoteView> {
       ),
       onSaved: (newValue) => _title = newValue!,
       initialValue: _title,
+      validator: (value) => value!.isEmpty ? 'Please enter title' : null,
     );
   }
 
@@ -118,7 +119,13 @@ class _AddNoteViewState extends State<AddNoteView> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
       ),
-      child: ElevatedButton(onPressed: _submit, child: Text(btnText)),
+      child: ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              _submit();
+            }
+          },
+          child: Text(btnText)),
     );
   }
 

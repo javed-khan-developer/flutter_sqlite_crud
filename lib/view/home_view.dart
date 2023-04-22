@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
               .toList()
               .length;
           return ListView.builder(
-            itemCount: int.parse(snapshot.data!.length.toString()),
+            itemCount: int.parse(snapshot.data!.length.toString()) + 1,
             padding: const EdgeInsets.symmetric(vertical: 20),
             itemBuilder: (context, index) {
               if (index == 0) {
@@ -71,9 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     return confirm;
                   },
                   direction: DismissDirection.endToStart,
-                  key: Key(snapshot.data![index].toString()),
+                  key: Key(snapshot.data![index - 1].toString()),
                   background: deleteWidget(),
-                  child: _buildNotes(snapshot.data![index]));
+                  child: _buildNotes(snapshot.data![index - 1]));
             },
           );
         },
@@ -90,7 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
         TextButton(
           onPressed: () {
             Navigator.pop(context, true);
-            _delete(snapshot.data![index].id!);
+            _delete(snapshot.data![index - 1].id!);
+            _updateNoteList();
           },
           child: const Text('Yes'),
         ),
